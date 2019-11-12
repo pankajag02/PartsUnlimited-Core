@@ -1,4 +1,4 @@
-ame: PartsUnlimited- Deployment Workflow
+name: PartsUnlimited- Deployment Workflow
 
 on: [push]
 
