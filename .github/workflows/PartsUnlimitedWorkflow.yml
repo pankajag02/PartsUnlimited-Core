@@ -3,21 +3,34 @@ name: PartsUnlimited- Deployment Workflow
 on: [push]
 
 jobs:
-  build:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+       - uses: actions/checkout@v1
+       - name: Setup .NET Core
+         uses: actions/setup-dotnet@v1
+         with:
+           dotnet-version: 2.2.108
+       - name: Restore with dotnet
+         run: dotnet restore
+       - name: Build with dotnet
+         run: dotnet build
+       - name: Test with dotnet
+         run: dotnet test
+       - name: Publish with dotnet
+         run: dotnet publish -c release
+   
+       - uses: azure/actions/login@master
 
-    runs-on: ubuntu-latest
- 
-    steps:
-    - uses: actions/checkout@v1
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 2.2.108
-    - name: Restore with dotnet
-      run: dotnet restore
-    - name: Build with dotnet
-      run: dotnet build
-    - name: Test with dotnet
-      run: dotnet test
-    - name: Publish with dotnet
-      run: dotnet publish -c release
+         with:
+
+           creds: ${{ secrets.AzureCredentials }}
+       - name: Create or Update Resources
+         run: |
+           az appservice plan create --resource-group MyResourceGroup --name MyappservicePlan --sku S1
+           az webapp create --resource-group MyResourceGroup --plan MyappservicePlan --name PartsUnlmitedWeb2610
+       - name: 'Run Azure webapp deploy action'
+         uses: azure/webapps-deploy@v1
+         with: 
+           app-name: PartsUnlmitedWeb2610 # Replace with your app name
+           package: './src/PartsUnlimitedWebsite/bin/Release/netcoreapp2.0/publish/'
